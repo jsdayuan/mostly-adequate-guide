@@ -69,3 +69,4 @@ var trace = curry(function (tag, x) {
 let id = x => x
 //下面这个特性对所有一元函数都成立
 compose(id,f)==compose(f,id)==f
+
