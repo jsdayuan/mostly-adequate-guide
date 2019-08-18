@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+
+<body>
+
+</body>
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+<script src="./index.js"></script>
+<script>
+  // console.log($.ajax, '$')
+  // $.ajax({
+  //   type:'POST',
+  //   url: "http://tbljw.isshw.cn/column_list",
+  //   success: function (result) {
+  //     console.log(result, 'res')
+  //   }
+  // })
+
+  // ////////////////////////
+  async function getGoodList() {
+    let list = await ajax('post', '/goods_list')
+    return list
+  }
+
+  /**
+   * 获取轮播图
+   */
+   async function getBrandList() {
+    let list = await ajax('get', '/brand_list')
+    return list
+  }
+
+  /**
+   * 获取分类栏目列表
+   */
+   async function getColumnList(){
+    let list = await ajax('post', ' /column_list')
+    return list
+  }
+  function init(){
+    getGoodList()
+    getBrandList()
+    getColumnList()
+  }
+  init()
+</script>
+
+
+</html>
