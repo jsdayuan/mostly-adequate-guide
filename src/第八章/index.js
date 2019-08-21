@@ -65,7 +65,7 @@ console.log(Container.of(3))
 
 // (a->b)->Container a -> Container b
 Container.prototype.map = function (f) {
-  return new Container(f(this._value))
+  return Container.of(f(this._value))
 }
 
 console.log(Container.of(5).map(x => x * 2))
@@ -73,7 +73,9 @@ console.log(Container.of(5).map(x => x * 2))
 //把值装进一个容器 且只能用map来处理它
 //抽象
 
+
 //薛定谔的Maybe
+
 let Maybe = function (x) {
   this._value = x
 }
@@ -84,7 +86,7 @@ Maybe.prototype.isNothing = function () {
 }
 
 Maybe.prototype.map = function (fn) {
-  return this.isNothing() ? new Maybe(null) : new Maybe(fn(this._value))
+  return this.isNothing() ? Maybe.of(null) : Maybe.of(fn(this._value))
 }
 
 console.log(Maybe.of("Malkovich Malkovich").map(match(/a/ig)))
@@ -131,7 +133,7 @@ let updateLedger = function (x) { return `$${x}` }
 var finishTransaction = compose(remainingBalance, updateLedger, prop('balance')); // <- 假定这两个函数已经在别处定义好了
 
 //  getTwenty :: Account -> Maybe(String)
-var getTwenty = compose(map(finishTransaction),withdraw(20));
+var getTwenty = compose(map(finishTransaction), withdraw(20));
 
 
 console.log(getTwenty({ balance: 200.00 }))
@@ -166,4 +168,46 @@ let getTwenty2 = compose(
 
 console.log(getTwenty2({ balance: 200.00 }))
 console.log(getTwenty2({ balance: 10.00 }))
+
+//纯错误处理 Either
+console.log('///////////////////////////////////////////////////////////////')
+
+function Left(x) {
+  this._value = x
+}
+
+Left.of = function (x) {
+  return new Left(x)
+}
+
+Left.prototype.map = function (f) {
+  return this
+}
+// ---
+function Right(x) {
+  this._value = x
+}
+
+Right.of = function (x) {
+  return new Right(x)
+}
+
+Right.prototype.map = function (f) {
+  return Right.of(f(this._value))
+}
+
+//Left 和 Right 是我们 Either 抽象类型的两个子类
+
+Right.of("rain").map(function(str){ return "b"+str; });
+// Right("brain")
+
+Left.of("rain").map(function(str){ return "b"+str; });
+// Left("rain")
+
+Right.of({host: 'localhost', port: 80}).map(prop('host'));
+// Right('localhost')
+
+Left.of("rolls eyes...").map(prop("host"));
+// Left('rolls eyes...')
+
 
