@@ -1,32 +1,34 @@
 console.log('类型签名')
 
 //  strLength :: String -> Number
-var strLength = function(s){
+var strLength = function (s) {
   return s.length;
 }
 
 //  join :: String -> [String] -> String
-var join = curry(function(what, xs){
+var join = curry(function (what, xs) {
   return xs.join(what);
 });
 
 //  match :: Regex -> String -> [String]
-var match = curry(function(reg, s){
+var match = curry(function (reg, s) {
   return s.match(reg);
 });
 
 //  replace :: Regex -> String -> String -> String
-var replace = curry(function(reg, sub, s){
+var replace = curry(function (reg, sub, s) {
   return s.replace(reg, sub);
 });
 
 // ////////////////////////////////////
 
 //  id :: a -> a
-var id = function(x){ return x; }
+var id = function (x) {
+  return x;
+}
 
 //  map :: (a -> b) -> [a] -> [b]
-var map = curry(function(f, xs){
+var map = curry(function (f, xs) {
   return xs.map(f);
 });
 
@@ -37,18 +39,20 @@ var map = curry(function(f, xs){
  */
 
 
- //一些其他的例子
+//一些其他的例子
 
- //  head :: [a] -> a
-var head = function(xs){ return xs[0]; }
+//  head :: [a] -> a
+var head = function (xs) {
+  return xs[0];
+}
 
 //  filter :: (a -> Bool) -> [a] -> [a]
-var filter = curry(function(f, xs){
+var filter = curry(function (f, xs) {
   return xs.filter(f);
 });
 
 //  reduce :: (b -> a -> b) -> b -> [a] -> b
-var reduce = curry(function(f, x, xs){
+var reduce = curry(function (f, x, xs) {
   return xs.reduce(f, x);
 });
 
@@ -60,5 +64,3 @@ compose(f, head) == compose(head, map(f));
 compose(map(f), filter(compose(p, f))) == compose(filter(p), map(f));
 
 // 类型约束
-
-

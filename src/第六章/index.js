@@ -15,6 +15,7 @@ var Impure = {
   })
 };
 
+
 var img = function (url) {
   return $('<img />', { src: url });
 };

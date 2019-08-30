@@ -28,6 +28,8 @@ function _test(x, val) {
 }
 let test = _curry(_test)
 
+let split = unboundMethod('split', 2)
+
 function compose(...fns) {
   let [fn1, fn2, ...rest] = fns.reverse()
 
@@ -160,6 +162,7 @@ let maybe = _curry(
   }
 )
 
+
 // getTwenty2 :: Account -> String
 let getTwenty2 = compose(
   maybe("You're broke!", finishTransaction),
@@ -198,16 +201,85 @@ Right.prototype.map = function (f) {
 
 //Left 和 Right 是我们 Either 抽象类型的两个子类
 
-Right.of("rain").map(function(str){ return "b"+str; });
+Right.of("rain").map(function (str) { return "b" + str; });
 // Right("brain")
 
-Left.of("rain").map(function(str){ return "b"+str; });
+Left.of("rain").map(function (str) { return "b" + str; });
 // Left("rain")
 
-Right.of({host: 'localhost', port: 80}).map(prop('host'));
+Right.of({ host: 'localhost', port: 80 }).map(prop('host'));
 // Right('localhost')
 
 Left.of("rolls eyes...").map(prop("host"));
 // Left('rolls eyes...')
 
+var either = function (f, g, e) {
+  switch (e.constructor) {
+    case Left: return f(e._value);
+    case Right: return g(e._value)
+  }
+}
 
+
+console.log('///////////////////////////////////////////////////////////////')
+/**
+ * 王老先生有作用
+ */
+
+//通过包裹将一个函数变成纯函数
+function getFormStorage(key) {
+  return function () {
+    return localStorage[key]
+  }
+}
+
+// functor
+
+let IO = function (f) {
+  this._value = f
+}
+
+IO.of = function (x) {
+  return new IO(function () {
+    return x
+  })
+}
+
+IO.prototype.map = function (f) {
+  return new IO(compose(f, this._value))
+}
+
+//不同的点在于 _value总是一个函数
+//延迟执行这个非纯动作
+
+// io_window :: IO [window]
+let io_window = IO.of(window)
+
+let io_window_width = io_window.map(function (win) { return win.innerWidth })
+console.log(io_window_width._value())
+
+let io_window_href = io_window.map(prop('location')).map(prop('href')).map(split('/'))
+console.log(io_window_href._value())
+
+
+////// 纯代码库: lib/params.js ///////
+
+//  url :: IO String
+var url = new IO(function() { return window.location.href; });
+
+//  toPairs =  String -> [[String]]
+var toPairs = compose(map(split('=')), split('&'));
+
+//  params :: String -> [[String]]
+var params = compose(toPairs, last, split('?'));
+
+//  findParam :: String -> IO Maybe [String]
+var findParam = function(key) {
+  return map(compose(Maybe.of, filter(compose(eq(key), head)), params), url);
+};
+
+////// 非纯调用代码: main.js ///////
+
+// 调用 __value() 来运行它！
+findParam("searchTerm").__value();
+// Maybe(['searchTerm', 'wafflehouse'])
