@@ -265,7 +265,7 @@ console.log(io_window_href._value())
 ////// 纯代码库: lib/params.js ///////
 
 //  url :: IO String
-var url = new IO(function() { return window.location.href; });
+var url = new IO(function () { return window.location.href; });
 
 //  toPairs =  String -> [[String]]
 var toPairs = compose(map(split('=')), split('&'));
@@ -274,7 +274,7 @@ var toPairs = compose(map(split('=')), split('&'));
 var params = compose(toPairs, last, split('?'));
 
 //  findParam :: String -> IO Maybe [String]
-var findParam = function(key) {
+var findParam = function (key) {
   return map(compose(Maybe.of, filter(compose(eq(key), head)), params), url);
 };
 
@@ -283,3 +283,13 @@ var findParam = function(key) {
 // 调用 __value() 来运行它！
 findParam("searchTerm").__value();
 // Maybe(['searchTerm', 'wafflehouse'])
+
+/**
+ * 把url包裹在IO里 然后把它传递给他的调用者
+ * IO(Maybe([String])) 有三层functor
+ * （Array）是最有资格成为mappable的容器类型
+ * map functor 让值在不离开容器的情况下修改值
+ * monad 一种值类型
+ * 
+ * _value 像是手榴弹的弹拴 只应该被调用者以最公开的方式拉动 可以将它更名为unsafePerformIO
+ */
