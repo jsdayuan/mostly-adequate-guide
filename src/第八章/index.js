@@ -43,6 +43,8 @@ function compose(...fns) {
 
 let match = unboundMethod('match', 2)
 let map = unboundMethod('map', 2)
+let filter = unboundMethod('filter', 2)
+let concat = unboundMethod('concat', 2)
 
 function _prop(label, obj) {
   return obj[label]
@@ -53,6 +55,8 @@ function _add(a, b) {
   return a + b
 }
 let add = _curry(_add)
+
+let id = id => id
 
 //创建一个容器
 
@@ -270,18 +274,24 @@ var url = new IO(function () { return window.location.href; });
 //  toPairs =  String -> [[String]]
 var toPairs = compose(map(split('=')), split('&'));
 
+function _last(arr) {
+  return arr[arr.length - 1]
+}
 //  params :: String -> [[String]]
-var params = compose(toPairs, last, split('?'));
+var params = compose(toPairs, _last, split('?'));
 
+let eq = _ => _ //暂不实现
+let head = (arr) => arr[0]
 //  findParam :: String -> IO Maybe [String]
 var findParam = function (key) {
-  return map(compose(Maybe.of, filter(compose(eq(key), head)), params), url);
+  // return map(compose(Maybe.of, filter(compose(eq(key), head)), params), url);  *********
 };
 
 ////// 非纯调用代码: main.js ///////
 
 // 调用 __value() 来运行它！
-findParam("searchTerm").__value();
+// findParam("searchTerm")._value();  *********
+
 // Maybe(['searchTerm', 'wafflehouse'])
 
 /**
@@ -293,3 +303,46 @@ findParam("searchTerm").__value();
  * 
  * _value 像是手榴弹的弹拴 只应该被调用者以最公开的方式拉动 可以将它更名为unsafePerformIO
  */
+
+
+//异步任务
+
+
+//一些理论
+// map(id) === id 同一律
+// compose(map(f), map(g)) === map(compose(f, g)) 结合律
+
+/**
+ * 同一律很简单 也很重要 因为这些定律都是可运行的代码 完全可以在我们自己的functor上试验他们
+ */
+
+let idLaw1 = map(id)
+let idLaw2 = id
+
+console.log(idLaw1(Container.of(2)))
+console.log(idLaw2(Container.of(2)))
+
+//Container 2
+
+//组合
+let compLaw1 = compose(map(concat('world')), map(concat('hello')))
+let compLaw2 = map(compose(concat('world'), concat('hello')))
+
+console.log(compLaw1(Container.of('')))
+console.log(compLaw2(Container.of('')))
+
+//Container hello world
+
+
+/**
+ * 在范畴学中 functor接受一个范畴的对象和态射 然后把他们映射到另一个范畴里去
+ * 这个新范畴一定会有一个单位元 也一定能够组合态射
+ * 把范畴想象成一个有着多个对象的网络 对象之间靠态射链接 
+ * functor可以把一个范畴映射到另一个 而且不会破坏原有的网络
+ */
+
+ /**
+  * maybe范畴：每个对象都有可能不存在 每个态射都有空值检查的范畴
+  * 在代码中的实现方式是map包裹每一个函数 用functor包裹每一个类型
+  * 代码中的functor实际上是把范畴映射到了一个包含类型和函数的子范畴
+  */
