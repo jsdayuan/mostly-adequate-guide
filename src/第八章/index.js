@@ -17,6 +17,7 @@ function _curry(fn, len = fn.length) {
 
 function unboundMethod(methodName, len) {
   return _curry(function (...args) {
+    args.length = len
     let obj = args.pop()
     return obj[methodName](...args)
   }, len)
@@ -27,6 +28,7 @@ function _test(x, val) {
   return val
 }
 let test = _curry(_test)
+
 
 let split = unboundMethod('split', 2)
 
@@ -45,6 +47,7 @@ let match = unboundMethod('match', 2)
 let map = unboundMethod('map', 2)
 let filter = unboundMethod('filter', 2)
 let concat = unboundMethod('concat', 2)
+
 
 function _prop(label, obj) {
   return obj[label]
@@ -272,7 +275,7 @@ console.log(io_window_href._value())
 var url = new IO(function () { return window.location.href; });
 
 //  toPairs =  String -> [[String]]
-var toPairs = compose(map(split('=')), split('&'));
+var toPairs = compose(test('hello22222'), map(split('=')), test('hello'), split('&'));
 
 function _last(arr) {
   return arr[arr.length - 1]
@@ -280,17 +283,18 @@ function _last(arr) {
 //  params :: String -> [[String]]
 var params = compose(toPairs, _last, split('?'));
 
-let eq = _ => _ //暂不实现
+let eq = _ => _ => _ //暂不实现
 let head = (arr) => arr[0]
 //  findParam :: String -> IO Maybe [String]
 var findParam = function (key) {
-  // return map(compose(Maybe.of, filter(compose(eq(key), head)), params), url);  *********
+  return map(compose(Maybe.of, filter(compose(eq(key), head)), params), url);
+  //  *********
 };
 
 ////// 非纯调用代码: main.js ///////
 
-// 调用 __value() 来运行它！
-// findParam("searchTerm")._value();  *********
+// 调用 _value() 来运行它！
+findParam("searchTerm")._value();
 
 // Maybe(['searchTerm', 'wafflehouse'])
 
@@ -324,7 +328,7 @@ console.log(idLaw2(Container.of(2)))
 
 //Container 2
 
-//组合
+//组合 结合律
 let compLaw1 = compose(map(concat('world')), map(concat('hello')))
 let compLaw2 = map(compose(concat('world'), concat('hello')))
 
@@ -341,8 +345,48 @@ console.log(compLaw2(Container.of('')))
  * functor可以把一个范畴映射到另一个 而且不会破坏原有的网络
  */
 
- /**
-  * maybe范畴：每个对象都有可能不存在 每个态射都有空值检查的范畴
-  * 在代码中的实现方式是map包裹每一个函数 用functor包裹每一个类型
-  * 代码中的functor实际上是把范畴映射到了一个包含类型和函数的子范畴
-  */
+/**
+ * maybe范畴：每个对象都有可能不存在 每个态射都有空值检查的范畴
+ * 在代码中的实现方式是map包裹每一个函数 用functor包裹每一个类型
+ * 代码中的functor实际上是把范畴映射到了一个包含类型和函数的子范畴
+ */
+
+
+/**
+ * 可以用一张图来表示这种态射及起对象的映射
+ * 
+ *       fn
+ * a     ->     b
+ * |            |
+ * | F.of       |F.of
+ * |            |
+ * v   map(fn)  v
+ * F a   ->     F b
+ * 
+ * 态射是标准的、普通的纯函数
+ * 这张图除了能表示态射借助functor F 完成从一个范畴到另一个范畴的映射之外
+ * 它还符合交换律
+ * 形成的每一个路径都指向同一个结果
+ * 不同的路径代表着不同的行为 但最终都会得到一个数据类型
+ * 
+ * 
+ * 
+ */
+
+let m1 = compose(Maybe.of, concat('A'))
+let m2 = compose(map(concat('A')), Maybe.of)
+
+console.log(m1('O'))
+console.log(m2('O'))
+
+/**
+ *              concat('A')
+ * "O"              ->            "OA"
+ * |                               |
+ * | Maybe.of                      |Maybe.of
+ * |                               |
+ * v          map(concat('A'))     v
+ * Maybe 'O'        ->            Maybe 'OA'
+ *
+ *
+ */
