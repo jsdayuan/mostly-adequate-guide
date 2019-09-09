@@ -238,4 +238,64 @@ let firstAddressStreet2 = compose(
 console.log(firstAddressStreet2(
   { addresses: [{ street: { name: 'Mulburry', number: 8402 }, postcode: "WC2N" }] }
 ), 'monad_join')
+//只要遇到嵌套的Maybe 就是用join 然后是IO
 
+// log :: x -> IO x
+let log = function (x) {
+  return new IO(function () {
+    console.log(`log:`, x)
+    return x
+  })
+}
+
+//setStyle :: sel -> str -> IO DOM
+let setStyle = curry(
+  function (sel, props) {
+    return new IO(function () {
+      return document.getElementsByTagName(sel)[0].setAttribute('class', props)
+    })
+  }
+)
+
+// getItem :: str -> IO str
+let getItem = function (key) {
+  return new IO(function () {
+    return localStorage.getItem(key)
+  })
+}
+
+//  applyPreferences :: String -> IO DOM
+let applyPreferences = compose(
+  join, map(setStyle('body')), join, map(log), map(JSON.parse), getItem
+);
+
+applyPreferences('user').unsafePerformIO()
+
+//chain 函数
+
+/**
+ * 从上面的例子中可以看出 总是在map后面调用join 可以把这个行为抽象到chain函数里面
+ * 
+ */
+//chain ::  Monad m => (a -> m b) -> m a -> m b
+let chain = curry(
+  function (f, m) {
+    return compose(join, map(f))(m)
+  }
+)
+//这里仅仅是将map/join打包到一个单独函数中
+//如果之前了解过monad chain也叫做 >>= (读作bind) 或者flatMap
+
+// 使用chain重构上面两个例子
+
+let firstAddressStreet3 = compose(
+  chain(safeProp('street')), chain(safeHead), safeProp('addresses')
+)
+console.log(firstAddressStreet3(
+  { addresses: [{ street: { name: 'Mulburry', number: 8402 }, postcode: "WC2N" }] }
+), 'monad_chain')
+
+let applyPreferences2 = compose(
+  chain(setStyle('body')), chain(log), map(JSON.parse), getItem
+);
+applyPreferences2('user').unsafePerformIO()
