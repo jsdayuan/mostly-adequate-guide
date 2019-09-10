@@ -299,3 +299,45 @@ let applyPreferences2 = compose(
   chain(setStyle('body')), chain(log), map(JSON.parse), getItem
 );
 applyPreferences2('user').unsafePerformIO()
+
+//把所有的map/join全部替换成了chain 显得整洁了一些
+//chain还可以轻松嵌套多个作用
+//因此我们就能以一种纯函数式的方式来表示序列和变量赋值
+
+IO.prototype.chain = function (f) {
+  return this.map(f).join()
+}
+
+function querySelector(sel) {
+  return new IO(function () {
+    return {
+      value: `${sel}------test`
+    }
+  })
+}
+
+// querySelector :: Selector -> IO DOM
+let IONestedChainTest = querySelector("input.username").chain(
+  function (uname) {
+    return querySelector("input.email").chain(function (email) {
+      return IO.of(
+        "Welcome " + uname.value + " " + "prepare for spam at " + email.value
+      );
+    });
+  }
+);
+
+console.log(IONestedChainTest.unsafePerformIO(), 'IONestedChainTest')
+
+//  maybe
+Maybe.prototype.chain = function (f) {
+  return this.map(f).join()
+}
+
+let MaybeNestedChainTest = Maybe.of(3).chain(function (three) {
+  return Maybe.of(2).map(add(three))
+})
+console.log(MaybeNestedChainTest, 'MaybeNestedChainTest')
+
+Maybe.of(null).chain(safeProp('address')).chain(safeProp('street'));
+// Maybe(null);
