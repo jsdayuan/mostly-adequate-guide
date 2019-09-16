@@ -26,6 +26,7 @@ function unboundMethod(methodName, len) {
 
 let concat = unboundMethod('concat', 2)
 let map = unboundMethod('map', 2)
+let reduce = unboundMethod('reduce', 3)
 
 function compose(...fns) {
   let [fn1, fn2, ...rest] = fns.reverse()
@@ -337,7 +338,22 @@ Maybe.prototype.chain = function (f) {
 let MaybeNestedChainTest = Maybe.of(3).chain(function (three) {
   return Maybe.of(2).map(add(three))
 })
+
 console.log(MaybeNestedChainTest, 'MaybeNestedChainTest')
 
 Maybe.of(null).chain(safeProp('address')).chain(safeProp('street'));
 // Maybe(null);
+
+/**
+ * querySelector 在最内层访问uname和email 这是函数式变量赋值的绝佳表现
+ * 因为IO把值借给了我们 我们也要以同样方式把值放回原处
+ * IO.of非常适合做这件事 同时也解释了pointed这一特性是monad接口存在的重要前提
+ * 不过map也能返回重要的类型
+ */
+
+ let IONestedChainTest2=querySelector("input-user").chain(function(user){
+  return querySelector('email-map').map(function(email){
+    return "Welcome " + user.value + " " + "prepare for spam at " + email.value
+  })
+ })
+ console.log(IONestedChainTest2.unsafePerformIO(), 'IONestedChainTest2')
