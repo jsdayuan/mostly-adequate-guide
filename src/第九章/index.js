@@ -351,9 +351,10 @@ Maybe.of(null).chain(safeProp('address')).chain(safeProp('street'));
  * 不过map也能返回重要的类型
  */
 
- let IONestedChainTest2=querySelector("input-user").chain(function(user){
-  return querySelector('email-map').map(function(email){
+let IONestedChainTest2 = querySelector("input-user").chain(function (user) {
+  return querySelector('email-map').map(function (email) {
     return "Welcome " + user.value + " " + "prepare for spam at " + email.value
   })
- })
- console.log(IONestedChainTest2.unsafePerformIO(), 'IONestedChainTest2')
+})
+console.log(IONestedChainTest2.unsafePerformIO(), 'IONestedChainTest2')
+//如果返回的是‘普通’值就用map 返回的是functor就用chain
