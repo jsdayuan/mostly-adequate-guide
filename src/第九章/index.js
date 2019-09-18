@@ -358,3 +358,65 @@ let IONestedChainTest2 = querySelector("input-user").chain(function (user) {
 })
 console.log(IONestedChainTest2.unsafePerformIO(), 'IONestedChainTest2')
 //如果返回的是‘普通’值就用map 返回的是functor就用chain
+
+// Maybe自我练习
+
+let data = {
+  data: [1, 2, 3, 4, 5]
+}
+
+let maybe = curry(
+  function (x, f, m) {
+    return m.isNothing() ? x : f(m._value)
+  }
+)
+
+let splice = unboundMethod('splice', 3)
+
+let deleteData = compose(maybe([], splice(0, 1)), map(prop('data')), Maybe.of)
+
+console.log(deleteData(data))
+
+// IO自我练习
+function createDom(ele) {
+  return new IO(function () {
+    let e = document.createElement(ele)
+    return e
+  })
+}
+
+let changeInner = curry(function (txt, ele) {
+  return new IO(function () {
+    ele.innerText = txt
+    return ele
+  })
+})
+
+function appendDom(dom) {
+  return new IO(function () {
+    return document.body.appendChild(dom)
+  })
+}
+
+let createElement = compose(
+  chain(appendDom),
+  chain(changeInner('hello monad')),
+  createDom
+)
+
+createElement('div').unsafePerformIO()
+
+//理论
+
+/**
+ * 结合律 (但不是我们所熟悉的那个结合律)
+ * compose(join,map(join))==compose(join,join)
+ *
+ * 这些定律表明了monad嵌套的本质
+ * 所以结合律关心的是如何让内层或外层的容器类型join
+ * 然后取得同样的结果
+ *
+ *
+ */
+
+
