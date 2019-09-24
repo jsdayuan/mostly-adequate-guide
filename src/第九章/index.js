@@ -416,7 +416,25 @@ createElement('div').unsafePerformIO()
  * 所以结合律关心的是如何让内层或外层的容器类型join
  * 然后取得同样的结果
  *
+ *               map(join)
+ * M(M(a))          ->          M(a)
+ *
+ *
+ *
+ *   | join                      | join
+ *   v                           v
+ *
+ *                join
+ *  M(a)            ->           a
  *
  */
 
-
+/**
+ * 同一律
+ * compose(join,map(of))==compose(join,of)==id
+ * 对任意的monad M  of和join 等同于id 也可以使用map(of)
+ * 我们把这个定律叫做三角同一律
+ * img -> static -> image ->三角同一律
+ * 
+ * 
+ */
