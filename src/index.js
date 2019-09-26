@@ -6,6 +6,6 @@
 // import "./第六章/index" //示例应用
 // import "./第七章/index" //类型签名
 // import "./第八章/index" //特百惠 functor
-import "./第九章/index" //monad
-// import "./第十章/index" //Applicative
+// import "./第九章/index" //monad
+import "./第十章/index" //Applicative
 

@@ -166,7 +166,7 @@ var print = function (x) {
 //  cat :: IO (IO String)
 var cat = compose(map(print), readFile);
 
-cat(".git/config").unsafePerformIO().unsafePerformIO()
+console.log(cat(".git/config").unsafePerformIO().unsafePerformIO(), 'io')
 // IO(IO("[core]\nrepositoryformatversion = 0\n"))
 
 //包了一层IO 显得怪怪的
@@ -436,5 +436,114 @@ createElement('div').unsafePerformIO()
  * 我们把这个定律叫做三角同一律
  * img -> static -> image ->三角同一律
  * 
- * 
  */
+
+var mcompose = function (f, g) {
+  return compose(chain(f), chain(g));
+}
+
+// 左同一律
+// mcompose(M, f) == f
+
+// 右同一律
+// mcompose(f, M) == f
+
+// 结合律
+// mcompose(mcompose(f, g), h) == mcompose(f, mcompose(g, h))
+
+/**
+ * 总结
+ * monad让我们深入到嵌套的计算当中 在完全避免回调金字塔的情况下 为变量进行赋值 运行有序的作用 等
+ * 当一个值被困在几层相同的容器中时 monad能拯救他 借助‘pointed’这个可靠的助手
+ * monad能够借给我们从盒子取出的值 而且知道哦们会在结束使用后还给他们
+ *
+ */
+
+//练习
+// 练习 1
+// ==========
+// 给定一个 user，使用 safeProp 和 map/join 或 chain 安全地获取 street 的 name
+
+var safePropT = _.curry(function (x, o) { return Maybe.of(o[x]); });
+var userT = {
+  id: 2,
+  name: "albert",
+  address: {
+    street: {
+      number: 22,
+      name: 'Walnut St'
+    }
+  }
+};
+
+var ex1 = compose(chain(safePropT('name')), chain(safePropT('street')), safePropT('address'))
+console.log(ex1(userT), '练习1')
+
+// 练习 2
+// ==========
+// 使用 getFile 获取文件名并删除目录，所以返回值仅仅是文件，然后以纯的方式打印文件
+
+var getFile = function () {
+  return new IO(function () { return __filename; });
+}
+
+var pureLog = function (x) {
+  return new IO(function () {
+    console.log(x);
+    return 'logged ' + x;
+  });
+}
+
+var ex2 = compose(chain(pureLog), getFile);
+let ex2T = ex2().unsafePerformIO()
+console.log(ex2T, '练习2')
+
+// 练习 3
+// ==========
+// 使用 getPost() 然后以 post 的 id 调用 getComments()
+// var getPost = function (i) {
+//   return new Task(function (rej, res) {
+//     setTimeout(function () {
+//       res({ id: i, title: 'Love them tasks' });
+//     }, 300);
+//   });
+// }
+
+// var getComments = function (i) {
+//   return new Task(function (rej, res) {
+//     setTimeout(function () {
+//       res([
+//         { post_id: i, body: "This book should be illegal" },
+//         { post_id: i, body: "Monads are like smelly shallots" }
+//       ]);
+//     }, 300);
+//   });
+// }
+// var ex3 = _.compose(chain(_.compose(getComments, _.prop('id'))), getPost);
+
+// 练习 4
+// ==========
+// 用 validateEmail、addToMailingList 和 emailBlast 实现 ex4 的类型签名
+
+//  addToMailingList :: Email -> IO([Email])
+// var addToMailingList = (function (list) {
+//   return function (email) {
+//     return new IO(function () {
+//       list.push(email);
+//       return list;
+//     });
+//   }
+// })([]);
+
+// function emailBlast(list) {
+//   return new IO(function () {
+//     return 'emailed: ' + list.join(',');
+//   });
+// }
+
+// var validateEmail = function (x) {
+//   return x.match(/\S+@\S+\.\S+/) ? (new Right(x)) : (new Left('invalid email'));
+// }
+
+// //  ex4 :: Email -> Either String (IO String)
+// var ex4 = _.compose(_.map(_.compose(chain(emailBlast), addToMailingList)), validateEmail);
