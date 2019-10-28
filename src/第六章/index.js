@@ -37,6 +37,7 @@ var srcs = _.compose(_.map(mediaUrl), _.prop('items'));
 
 var images = _.compose(_.map(img), srcs);
 
+
 //compose(map(compose(img,mediaUrl)),prop('items'))  利用map的结合律将srcs与images合并成一行
 
 var renderImages = _.compose(Impure.setHtml("body"), images);
@@ -53,4 +54,4 @@ app("cats");
  */
 
  //map的组合律
- var law=compose(map(f,map(g)))==map(compose(f,g))
+ var law=compose(map(f),map(g))==map(compose(f,g))
